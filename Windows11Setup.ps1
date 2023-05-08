@@ -47,13 +47,17 @@ $apps = @(
     @{name = "Docker.DockerDesktop" },
     @{name = "Microsoft.DotNet.SDK.6"  },
     @{name = "Microsoft.DotNet.SDK.7" },
-    @{name = "GitHub.cli" },
     @{name = "Canonical.Ubuntu.2204" },
-    @{name = "GitHub.GitHubDesktop" },
     @{name = "JanDeDobbeleer.OhMyPosh" },
+    @{name = "Postman.Postman" },
     @{name = "Python.Python.3.10" },
-    @{name = "Node.js" },
-    @{name = "Visual Studio Enterprise 2022" }
+    @{name = "OpenJS.NodeJS.LTS" },
+    @{name = "Google.Chrome" },
+    @{name = "Mozilla.Firefox" },
+    @{name = "Microsoft.VisualStudio.2022.Enterprise"
+    
+    @{name = "Spotify.Spotify"
+    @{name = "WhatsApp.WhatsApp" }
 );
 Foreach ($app in $apps) {
     $listApp = winget list --exact -q $app.name --accept-source-agreements 
@@ -74,7 +78,7 @@ Foreach ($app in $apps) {
 #Remove Apps
 Write-Output "Removing Apps"
 
-$apps = "*3DPrint*", "Microsoft.MixedReality.Portal"
+$apps = "*3DPrint*", "Microsoft.MixedReality.Portal", "Microsoft.SkypeApp"
 Foreach ($app in $apps)
 {
   Write-host "Uninstalling:" $app
