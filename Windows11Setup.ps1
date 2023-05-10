@@ -57,8 +57,8 @@ $apps = @(
     @{name = "OpenJS.NodeJS.LTS" },
     @{name = "Google.Chrome" },
     @{name = "Mozilla.Firefox" },
-    @{name = "Microsoft.VisualStudio.2022.Enterprise",
-    @{name = "Spotify.Spotify",
+    @{name = "Microsoft.VisualStudio.2022.Enterprise" },
+    @{name = "Spotify.Spotify" },
     @{name = "WhatsApp.WhatsApp" }
 );
 
