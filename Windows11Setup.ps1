@@ -41,6 +41,7 @@ $settingsJson | Out-File $settingsPath -Encoding utf8
 Write-Output "Installing Apps"
 $apps = @(
     @{name = "Git.Git" },
+    @{name = "Microsoft.NuGet" },
     @{name = "Microsoft.AzureCLI" }, 
     @{name = "Microsoft.PowerShell" }, 
     @{name = "Microsoft.VisualStudioCode" }, 
