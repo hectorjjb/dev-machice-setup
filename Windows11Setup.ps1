@@ -1,3 +1,4 @@
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 #Install WinGet
 #Based on this gist: https://gist.github.com/crutkas/6c2096eae387e544bd05cde246f23901
 $hasPackageManager = Get-AppPackage -name 'Microsoft.DesktopAppInstaller'
@@ -56,9 +57,9 @@ $apps = @(
     @{name = "Google.Chrome" },
     @{name = "Mozilla.Firefox" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise",
-    
     @{name = "Spotify.Spotify",
-    @{name = "WhatsApp.WhatsApp" }
+    @{name = "WhatsApp.WhatsApp" 
+    }
 );
 Foreach ($app in $apps) {
     $listApp = winget list --exact -q $app.name --accept-source-agreements 
