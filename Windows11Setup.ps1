@@ -60,7 +60,7 @@ $apps = @(
     @{name = "Mozilla.Firefox" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
     @{name = "Spotify.Spotify" },
-    @{name = "WhatsApp.WhatsApp" }
+    @{name = "WhatsApp.WhatsApp"; source = "msstore" }
 );
 
 foreach ($app in $apps) {
