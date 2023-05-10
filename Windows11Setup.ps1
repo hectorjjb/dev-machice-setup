@@ -59,7 +59,7 @@ $apps = @(
     @{name = "Google.Chrome" },
     @{name = "Mozilla.Firefox" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
-    @{name = "Spotify.Spotify" },
+    @{name = "Spotify.Spotify"; source = "msstore" },
     @{name = "WhatsApp.WhatsApp"; source = "msstore" }
 );
 
