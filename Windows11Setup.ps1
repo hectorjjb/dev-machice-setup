@@ -40,13 +40,13 @@ $settingsJson | Out-File $settingsPath -Encoding utf8
 #Install New apps
 Write-Output "Installing Apps"
 $apps = @(
+    @{name = "Git.Git" },
     @{name = "Microsoft.AzureCLI" }, 
     @{name = "Microsoft.PowerShell" }, 
     @{name = "Microsoft.VisualStudioCode" }, 
     @{name = "Microsoft.WindowsTerminal"; source = "msstore" }, 
     @{name = "Microsoft.Azure.StorageExplorer" }, 
-    @{name = "Microsoft.PowerToys" }, 
-    @{name = "Git.Git" },
+    @{name = "Microsoft.PowerToys" },
     @{name = "GitHub.GitLFS" },
     @{name = "Docker.DockerDesktop" },
     @{name = "Microsoft.DotNet.SDK.6" },
