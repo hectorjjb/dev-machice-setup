@@ -55,9 +55,9 @@ $apps = @(
     @{name = "OpenJS.NodeJS.LTS" },
     @{name = "Google.Chrome" },
     @{name = "Mozilla.Firefox" },
-    @{name = "Microsoft.VisualStudio.2022.Enterprise"
+    @{name = "Microsoft.VisualStudio.2022.Enterprise",
     
-    @{name = "Spotify.Spotify"
+    @{name = "Spotify.Spotify",
     @{name = "WhatsApp.WhatsApp" }
 );
 Foreach ($app in $apps) {
