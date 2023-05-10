@@ -1,4 +1,5 @@
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
 #Install WinGet
 #Based on this gist: https://gist.github.com/crutkas/6c2096eae387e544bd05cde246f23901
 $hasPackageManager = Get-AppPackage -name 'Microsoft.DesktopAppInstaller'
@@ -58,22 +59,27 @@ $apps = @(
     @{name = "Mozilla.Firefox" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise",
     @{name = "Spotify.Spotify",
-    @{name = "WhatsApp.WhatsApp" 
-    }
+    @{name = "WhatsApp.WhatsApp" }
 );
-Foreach ($app in $apps) {
-    $listApp = winget list --exact -q $app.name --accept-source-agreements 
-    if (![String]::Join("", $listApp).Contains($app.name)) {
-        Write-host "Installing:" $app.name
-        if ($app.source -ne $null) {
-            winget install --exact --silent $app.name --source $app.source --accept-package-agreements
+
+foreach ($app in $apps) {
+    try {
+        $listApp = winget list --exact -q $app.name --accept-source-agreements 
+        if (![String]::Join("", $listApp).Contains($app.name)) {
+            Write-Host "Installing: $($app.name)"
+            if ($null -ne $app.source) {
+                winget install --exact --silent $app.name --source $app.source --accept-package-agreements
+            }
+            else {
+                winget install --exact --silent $app.name --accept-package-agreements
+            }
         }
         else {
-            winget install --exact --silent $app.name --accept-package-agreements
+            Write-Host "Skipping install of $($app.name)"
         }
     }
-    else {
-        Write-host "Skipping Install of " $app.name
+    catch {
+        Write-Output "Error installing $($app.name): $_"
     }
 }
 
@@ -81,11 +87,31 @@ Foreach ($app in $apps) {
 Write-Output "Removing Apps"
 
 $apps = "*3DPrint*", "Microsoft.MixedReality.Portal", "Microsoft.SkypeApp"
-Foreach ($app in $apps)
-{
-  Write-host "Uninstalling:" $app
-  Get-AppxPackage -allusers $app | Remove-AppxPackage
+foreach ($app in $apps) {
+    try {
+        Write-Host "Uninstalling $($app)"
+        Get-AppxPackage -AllUsers $app | Remove-AppxPackage | Out-Null
+    }
+    catch {
+        Write-Output "Error uninstalling $($app): $_"
+    }
 }
 
-#Setup WSL
-wsl --install
+# Install WSL
+# https://learn.microsoft.com/en-us/windows/wsl/install
+Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -OutVariable WSLStatus | Out-Null
+if ($WSLStatus.State -ne "Enabled") {
+    wsl --install
+} 
+else {
+    Write-Host "WSL already installed. Skipping..."
+}
+
+# Enable long paths
+try {
+    New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
+        -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+}
+catch {
+    Write-Output "Error enabling long paths: $_"
+}
