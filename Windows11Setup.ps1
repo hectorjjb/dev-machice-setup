@@ -143,6 +143,14 @@ catch {
     Write-Output "Error enabling git lfs: $_"
 }
 
+# Update npm
+try {
+    npm install --global npm
+}
+catch {
+    Write-Output "Error enabling git lfs: $_"
+}
+
 # Install yarn
 try {
     npm install --global yarn
