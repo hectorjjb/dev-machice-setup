@@ -158,3 +158,11 @@ try {
 catch {
     Write-Output "Error enabling git lfs: $_"
 }
+
+# Install Azure DevOps (formerly VSTS) Auth helper for npm
+try {
+    npm install -g vsts-npm-auth --registry https://registry.npmjs.com --always-auth false
+}
+catch {
+    Write-Output "Error installing Azure DevOps (formerly VSTS) Auth helper for npm: $_"
+}
