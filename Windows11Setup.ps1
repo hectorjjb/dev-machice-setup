@@ -134,3 +134,19 @@ try {
 catch {
     Write-Output "Error enabling git lfs: $_"
 }
+
+# Update SWL
+try {
+    wsl --update
+}
+catch {
+    Write-Output "Error enabling git lfs: $_"
+}
+
+# Install yarn
+try {
+    npm install --global yarn
+}
+catch {
+    Write-Output "Error enabling git lfs: $_"
+}
