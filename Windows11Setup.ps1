@@ -117,3 +117,20 @@ try {
 catch {
     Write-Output "Error enabling long paths: $_"
 }
+
+# Enable git long paths
+try {
+    git config --system core.longpaths true
+}
+catch {
+    Write-Output "Error enabling git long paths: $_"
+}
+
+
+# Enable git lfs
+try {
+    git lfs install
+}
+catch {
+    Write-Output "Error enabling git lfs: $_"
+}
