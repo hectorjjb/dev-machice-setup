@@ -1,4 +1,4 @@
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted
 
 #Install WinGet
 #Based on this gist: https://gist.github.com/crutkas/6c2096eae387e544bd05cde246f23901
