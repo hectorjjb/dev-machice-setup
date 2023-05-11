@@ -118,6 +118,14 @@ catch {
     Write-Output "Error enabling long paths: $_"
 }
 
+# Use Terminal-Icons to add missing folder or file icons
+try {
+    Install-Module -Name Terminal-Icons -Repository PSGallery -Force
+}
+catch {
+    Write-Output "Error enabling git long paths: $_"
+}
+
 # Enable git long paths
 try {
     git config --system core.longpaths true
@@ -125,7 +133,6 @@ try {
 catch {
     Write-Output "Error enabling git long paths: $_"
 }
-
 
 # Enable git lfs
 try {
