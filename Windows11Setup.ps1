@@ -53,15 +53,15 @@ $apps = @(
     @{name = "Microsoft.DotNet.SDK.6" },
     @{name = "Microsoft.DotNet.SDK.7" },
     @{name = "Canonical.Ubuntu.2204" },
-    @{name = "JanDeDobbeleer.OhMyPosh" },
+    @{name = "XP8K0HKJFRXGCK"; source = "msstore" }, # oh-my-posh
     @{name = "Postman.Postman" },
     @{name = "Python.Python.3.10" },
     @{name = "OpenJS.NodeJS.LTS" },
     @{name = "Google.Chrome" },
     @{name = "Mozilla.Firefox" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
-    @{name = "Spotify.Spotify"; source = "msstore" },
-    @{name = "WhatsApp.WhatsApp"; source = "msstore" }
+    @{name = "9NCBCSZSJRSB"; source = "msstore" }, # Spotify
+    @{name = "9NKSQGP7F2NH"; source = "msstore" }  # WhatsApp
 );
 
 foreach ($app in $apps) {
