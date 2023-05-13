@@ -62,6 +62,7 @@ $apps = @(
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
     @{name = "9NCBCSZSJRSB"; source = "msstore" }, # Spotify
     @{name = "9NKSQGP7F2NH"; source = "msstore" }  # WhatsApp
+    @{name = "9WZDNCRFJ3TJ"; source = "msstore" }  # Netflix
 );
 
 foreach ($app in $apps) {
