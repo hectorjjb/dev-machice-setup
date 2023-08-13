@@ -56,7 +56,6 @@ $apps = @(
     @{name = "Python.Python.3.10" },
     @{name = "OpenJS.NodeJS.LTS" },
     @{name = "Google.Chrome" },
-    @{name = "Mozilla.Firefox" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
     @{name = "Spotify.Spotify" },
     @{name = "WhatsApp.WhatsApp" }
