@@ -18,8 +18,9 @@ brew tap homebrew/cask
 brew install spotify
 brew install visual-studio-code
 brew install whatsapp
+brew install vlc
 
-
+brew install wget
 brew install git
 brew install git-lfs
 brew install tree
