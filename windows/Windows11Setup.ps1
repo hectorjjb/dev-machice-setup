@@ -48,17 +48,18 @@ $apps = @(
     @{name = "Git.Git" },
     @{name = "GitHub.GitLFS" },
     @{name = "Docker.DockerDesktop" },
-    @{name = "Microsoft.DotNet.SDK.6"  },
+    @{name = "OpenJS.NodeJS.LTS"  },
     @{name = "Microsoft.DotNet.SDK.7" },
     @{name = "Canonical.Ubuntu.2204" },
     @{name = "JanDeDobbeleer.OhMyPosh" },
     @{name = "Postman.Postman" },
     @{name = "Python.Python.3.10" },
-    @{name = "OpenJS.NodeJS.LTS" },
     @{name = "Google.Chrome" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
+    @{name = "7zip.7zip" },
     @{name = "Spotify.Spotify" },
-    @{name = "WhatsApp.WhatsApp" }
+    @{name = "WhatsApp.WhatsApp" },
+    @{name = "Zoom.Zoom" }
 );
 
 foreach ($app in $apps) {
