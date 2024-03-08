@@ -135,6 +135,22 @@ catch {
     Write-Output "Error enabling git long paths: $_"
 }
 
+# Set git user.name
+try {
+    git config --global user.name "Hector Jimenez"
+}
+catch {
+    Write-Output "Error setting git user.name $_"
+}
+
+# Set git user.email
+try {
+    git config --global user.email hectorjimenez@outlook.com
+}
+catch {
+    Write-Output "Error setting git user.email $_"
+}
+
 # Enable git lfs
 try {
     git lfs install
