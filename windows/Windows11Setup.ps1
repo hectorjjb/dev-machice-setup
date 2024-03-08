@@ -45,24 +45,24 @@ $apps = @(
     @{name = "Microsoft.AzureCLI" }, 
     @{name = "Microsoft.PowerShell" }, 
     @{name = "Microsoft.VisualStudioCode" }, 
-    @{name = "Microsoft.WindowsTerminal"; source = "msstore" }, 
+    @{name = "9N0DX20HK701"; source = "msstore" },      # Microsoft Windows Terminal
     @{name = "Microsoft.Azure.StorageExplorer" }, 
-    @{name = "Microsoft.PowerToys" },
+    @{name = "XP89DCGQ3K6VLD"; source = "msstore" },    # Microsoft PowerToys
     @{name = "GitHub.GitLFS" },
-    @{name = "Docker.DockerDesktop" },
-    @{name = "Microsoft.DotNet.SDK.6" },
-    @{name = "Microsoft.DotNet.SDK.7" },
+    @{name = "OpenJS.NodeJS.LTS"  },
+    @{name = "Microsoft.DotNet.SDK.8" },
     @{name = "Canonical.Ubuntu.2204" },
-    @{name = "XP8K0HKJFRXGCK"; source = "msstore" }, # oh-my-posh
+    @{name = "XP8K0HKJFRXGCK"; source = "msstore" },    # oh-my-posh
     @{name = "Postman.Postman" },
-    @{name = "Python.Python.3.10" },
-    @{name = "OpenJS.NodeJS.LTS" },
+    @{name = "Python.Python.3.12" },
     @{name = "Google.Chrome" },
-    @{name = "Mozilla.Firefox" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
-    @{name = "9NCBCSZSJRSB"; source = "msstore" }, # Spotify
-    @{name = "9NKSQGP7F2NH"; source = "msstore" }  # WhatsApp
-    @{name = "9WZDNCRFJ3TJ"; source = "msstore" }  # Netflix
+    @{name = "9NCBCSZSJRSB"; source = "msstore" },      # Spotify
+    @{name = "9NKSQGP7F2NH"; source = "msstore" }       # WhatsApp
+    @{name = "9WZDNCRFJ3TJ"; source = "msstore" }       # Netflix
+    @{name = "XP9CDQW6ML4NQN"; source = "msstore" }     # Plex
+    @{name = "7zip.7zip" },
+    @{name = "XP99J3KP4XZ4VV"; source = "msstore" }     # Zoom
 );
 
 foreach ($app in $apps) {
