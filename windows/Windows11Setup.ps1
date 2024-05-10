@@ -46,14 +46,14 @@ $apps = @(
     @{name = "Microsoft.PowerShell" }, 
     @{name = "Microsoft.VisualStudioCode" }, 
     @{name = "9N0DX20HK701"; source = "msstore" },      # Microsoft Windows Terminal
-    @{name = "Microsoft.Azure.StorageExplorer" }, 
+    # @{name = "Microsoft.Azure.StorageExplorer" }, 
     @{name = "XP89DCGQ3K6VLD"; source = "msstore" },    # Microsoft PowerToys
     @{name = "GitHub.GitLFS" },
     @{name = "OpenJS.NodeJS.LTS"  },
     @{name = "Microsoft.DotNet.SDK.8" },
     @{name = "Canonical.Ubuntu.2204" },
     @{name = "XP8K0HKJFRXGCK"; source = "msstore" },    # oh-my-posh
-    @{name = "Postman.Postman" },
+    # @{name = "Postman.Postman" },
     @{name = "Python.Python.3.12" },
     @{name = "Google.Chrome" },
     @{name = "Microsoft.VisualStudio.2022.Enterprise" },
