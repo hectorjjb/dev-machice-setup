@@ -28,12 +28,12 @@ BREW_PREFIX=$(brew --prefix)
 ## Apps I use
 brew install --cask spotify || true
 brew install --cask visual-studio-code || true
-brew install --cask whatsapp || true
 brew install --cask vlc || true
 brew install --cask microsoft-edge || true
 brew install --cask microsoft-teams || true
 brew install --cask github || true
 
+brew install mas || true
 brew install wget || true
 brew install git || true
 brew install git-lfs || true

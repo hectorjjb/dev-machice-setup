@@ -16,7 +16,12 @@ echo ">>> Installing Homebrew and essentials..."
 bash "$SCRIPT_DIR/modules/brew-essentials.sh"
 echo ""
 
-# 3. Install Oh My Zsh and plugins
+# 3. Install App Store apps
+echo ">>> Installing App Store apps..."
+bash "$SCRIPT_DIR/modules/appstore-apps.sh"
+echo ""
+
+# 4. Install Oh My Zsh and plugins
 echo ">>> Setting up Zsh..."
 bash "$SCRIPT_DIR/modules/install-zsh.sh"
 echo ""
