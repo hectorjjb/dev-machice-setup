@@ -184,24 +184,29 @@ sudo systemsetup -settimezone "America/Los_Angeles" > /dev/null
 # Stop iTunes from responding to the keyboard media keys
 #launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
-# Swap Command and Control keys (Windows-like shortcuts: Ctrl+C to copy, etc.)
-# NOTE: This is configured per-keyboard via System Settings > Keyboard > Keyboard Shortcuts > Modifier Keys
-# The setting is stored in ~/Library/Preferences/ByHost/.GlobalPreferences.*.plist
-# under keys like "com.apple.keyboard.modifiermapping.VENDORID-PRODUCTID-0"
-# This allows different keyboards to have different mappings (e.g. swap on main keyboard but not on Logitech)
+# ⚠️  MANUAL STEP REQUIRED: Swap Command ↔ Control keys (Windows-like shortcuts)
 #
-# To configure: System Settings > Keyboard > Keyboard Shortcuts > Modifier Keys
-#   - Select the keyboard from the dropdown
-#   - Set Control (^) Key → Command
-#   - Set Command Key → Control (^)
+# This CANNOT be automated by the script because macOS stores modifier key
+# mappings per-keyboard using hardware vendor/product IDs, which vary depending
+# on which keyboards are connected. This is actually preferable — it lets you
+# swap keys on your main keyboard while keeping other keyboards (e.g. Logitech)
+# with their default layout.
 #
-# Remove any leftover hidutil LaunchAgent from previous script runs
+# After running this script, do the following ONCE per keyboard:
+#   1. Open System Settings > Keyboard > Keyboard Shortcuts > Modifier Keys
+#   2. Select your keyboard from the "Select keyboard" dropdown
+#   3. Set "Control (^) Key" → Command
+#   4. Set "Command Key" → Control (^)
+#   5. Click "Done"
+#
+# The setting persists across reboots automatically — no LaunchAgent needed.
+#
+# Cleanup: Remove any leftover hidutil remapping from older versions of this script
 if [ -f "$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist" ]; then
   launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist" 2>/dev/null || true
   rm -f "$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist"
   echo "Removed old hidutil key remapping LaunchAgent"
 fi
-# Clear any active hidutil remapping from previous runs
 hidutil property --set '{"UserKeyMapping":[]}' > /dev/null 2>&1 || true
 
 echo "✓ Trackpad, keyboard, and input configured"
