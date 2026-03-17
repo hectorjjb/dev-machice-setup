@@ -182,6 +182,38 @@ sudo systemsetup -settimezone "Asia/Singapore" > /dev/null
 # Stop iTunes from responding to the keyboard media keys
 #launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
+# Swap Command and Control keys (Windows-like shortcuts: Ctrl+C to copy, etc.)
+# Uses hidutil to remap: Command <-> Control (both left and right)
+hidutil property --set '{"UserKeyMapping":[
+  {"HIDKeyboardModifierMappingSrc":0x7000000E3,"HIDKeyboardModifierMappingDst":0x7000000E0},
+  {"HIDKeyboardModifierMappingSrc":0x7000000E0,"HIDKeyboardModifierMappingDst":0x7000000E3},
+  {"HIDKeyboardModifierMappingSrc":0x7000000E7,"HIDKeyboardModifierMappingDst":0x7000000E4},
+  {"HIDKeyboardModifierMappingSrc":0x7000000E4,"HIDKeyboardModifierMappingDst":0x7000000E7}
+]}' > /dev/null
+
+# Persist the swap across reboots via LaunchAgent
+LAUNCH_AGENT="$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist"
+mkdir -p "$HOME/Library/LaunchAgents"
+cat > "$LAUNCH_AGENT" << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.local.KeyRemapping</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/hidutil</string>
+    <string>property</string>
+    <string>--set</string>
+    <string>{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x7000000E3,"HIDKeyboardModifierMappingDst":0x7000000E0},{"HIDKeyboardModifierMappingSrc":0x7000000E0,"HIDKeyboardModifierMappingDst":0x7000000E3},{"HIDKeyboardModifierMappingSrc":0x7000000E7,"HIDKeyboardModifierMappingDst":0x7000000E4},{"HIDKeyboardModifierMappingSrc":0x7000000E4,"HIDKeyboardModifierMappingDst":0x7000000E7}]}</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+EOF
+
 echo "✓ Trackpad, keyboard, and input configured"
 
 ###############################################################################
@@ -536,6 +568,11 @@ killall mds > /dev/null 2>&1
 sudo mdutil -i on / > /dev/null
 # Rebuild the index from scratch
 sudo mdutil -E / > /dev/null
+
+# Set Spotlight shortcut to Control+Space (matches physical key position after Command<->Control swap)
+# Key combo: Control (262144 = 0x40000) + Space (keyCode 49)
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 \
+  "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
 
 echo "✓ Spotlight configured"
 
