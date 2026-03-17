@@ -14,27 +14,33 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 ###############################################################################
 echo "Configuring General UI/UX..."
 
-# Detect hardware model and set computer name suffix
+# Detect hardware model and set computer name
 MODEL_NAME=$(system_profiler SPHardwareDataType | awk -F': ' '/Model Name/{print $2}')
 case "$MODEL_NAME" in
-  *"MacBook Air"*)  MODEL_SUFFIX="Macbook-Air";;
-  *"MacBook Pro"*)  MODEL_SUFFIX="Macbook-Pro";;
-  *"MacBook"*)      MODEL_SUFFIX="Macbook";;
-  *"Mac mini"*)     MODEL_SUFFIX="Mac-Mini";;
-  *"Mac Pro"*)      MODEL_SUFFIX="Mac-Pro";;
-  *"Mac Studio"*)   MODEL_SUFFIX="Mac-Studio";;
+  *"MacBook Air"*)  MODEL_SUFFIX="MacBook Air";;
+  *"MacBook Pro"*)  MODEL_SUFFIX="MacBook Pro";;
+  *"MacBook"*)      MODEL_SUFFIX="MacBook";;
+  *"Mac mini"*)     MODEL_SUFFIX="Mac Mini";;
+  *"Mac Pro"*)      MODEL_SUFFIX="Mac Pro";;
+  *"Mac Studio"*)   MODEL_SUFFIX="Mac Studio";;
   *"iMac"*)         MODEL_SUFFIX="iMac";;
   *)                MODEL_SUFFIX="Mac";;
 esac
 
-COMPUTER_NAME="${MODEL_SUFFIX}"
+COMPUTER_NAME="Hector's ${MODEL_SUFFIX}"
+# LocalHostName must be DNS-safe: no spaces, no apostrophes
+LOCAL_NAME="Hectors-${MODEL_SUFFIX// /-}"
 
 # Set computer name (as done via System Settings → General → Sharing)
 sudo scutil --set ComputerName "$COMPUTER_NAME"
-sudo scutil --set HostName "$COMPUTER_NAME"
-sudo scutil --set LocalHostName "$COMPUTER_NAME"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$COMPUTER_NAME"
-echo "Computer name set to: $COMPUTER_NAME"
+# Clear HostName if previously set — let macOS derive it from LocalHostName
+if scutil --get HostName &>/dev/null; then
+  sudo scutil --remove HostName
+  echo "Cleared explicit HostName (macOS will derive it automatically)"
+fi
+sudo scutil --set LocalHostName "$LOCAL_NAME"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$LOCAL_NAME"
+echo "Computer name set to: $COMPUTER_NAME (local: $LOCAL_NAME)"
 
 # Disable the sound effects on boot
 # sudo nvram SystemAudioVolume=" "
@@ -42,23 +48,23 @@ echo "Computer name set to: $COMPUTER_NAME"
 # Set highlight color to green
 # defaults write NSGlobalDomain AppleHighlightColor -string "0.764700 0.976500 0.568600"
 
-# Set sidebar icon size to medium
-defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2
+# Reset sidebar icon size to system default
+defaults delete NSGlobalDomain NSTableViewDefaultSizeMode 2>/dev/null || true
 
 # Showing scrollbars
 # defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
 # Possible values: `WhenScrolling`, `Automatic` and `Always`
 
-# Disable the over-the-top focus ring animation
-defaults write NSGlobalDomain NSUseAnimatedFocusRing -bool false
+# Reset focus ring animation to system default (enabled)
+defaults delete NSGlobalDomain NSUseAnimatedFocusRing 2>/dev/null || true
 
-# Expand save panel by default
-defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
-defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+# Reset save panel to system default (collapsed)
+defaults delete NSGlobalDomain NSNavPanelExpandedStateForSaveMode 2>/dev/null || true
+defaults delete NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 2>/dev/null || true
 
-# Expand print panel by default
-defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
-defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
+# Reset print panel to system default (collapsed)
+defaults delete NSGlobalDomain PMPrintingExpandedStateForPrint 2>/dev/null || true
+defaults delete NSGlobalDomain PMPrintingExpandedStateForPrint2 2>/dev/null || true
 
 # Save to disk (not to iCloud) by default
 # defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
@@ -95,14 +101,14 @@ sudo pmset -a restartafterfreeze 1
 # Disable automatic capitalization as it’s annoying when typing code
 defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
 
-# Disable smart dashes as they’re annoying when typing code
-defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+# Reset smart dashes to system default (enabled)
+defaults delete NSGlobalDomain NSAutomaticDashSubstitutionEnabled 2>/dev/null || true
 
 # Disable automatic period substitution as it’s annoying when typing code
 defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
 
-# Disable smart quotes as they’re annoying when typing code
-defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+# Reset smart quotes to system default (enabled)
+defaults delete NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled 2>/dev/null || true
 
 # Disable auto-correct
 # defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
@@ -139,14 +145,13 @@ defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 # Trackpad: enable three-finger drag
 defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
-# Disable “natural” (Lion-style) scrolling
-defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+# Reset natural scrolling to system default (enabled)
+defaults delete NSGlobalDomain com.apple.swipescrolldirection 2>/dev/null || true
 
 # NOTE: Bluetooth SBC bitpool tuning is obsolete on modern macOS (AAC/LC3 codecs are used)
 
-# Enable full keyboard access for all controls
-# (e.g. enable Tab in modal dialogs)
-defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+# Reset full keyboard access to system default
+defaults delete NSGlobalDomain AppleKeyboardUIMode 2>/dev/null || true
 
 # Use scroll gesture with the Ctrl (^) modifier key to zoom
 # defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
@@ -154,15 +159,12 @@ defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 # Follow the keyboard focus while zoomed in
 # defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
 
-# Disable press-and-hold for keys in favor of key repeat
-defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+# Reset press-and-hold to system default (enabled — shows accent menu)
+defaults delete NSGlobalDomain ApplePressAndHoldEnabled 2>/dev/null || true
 
-# Set a blazingly fast keyboard repeat rate
-# 1 => 15ms
-# 10 => 150ms
-# https://apple.stackexchange.com/questions/10467/how-to-increase-keyboard-key-repeat-rate-on-os-x
-defaults write NSGlobalDomain KeyRepeat -int 2
-defaults write NSGlobalDomain InitialKeyRepeat -int 15
+# Reset keyboard repeat rate to system default
+defaults delete NSGlobalDomain KeyRepeat 2>/dev/null || true
+defaults delete NSGlobalDomain InitialKeyRepeat 2>/dev/null || true
 
 # Set language and text formats
 # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
@@ -177,42 +179,30 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bo
 
 # Set the timezone; see `sudo systemsetup -listtimezones` for other values
 # (systemsetup is deprecated since macOS 12.3 but timezone setting still works)
-sudo systemsetup -settimezone "Asia/Singapore" > /dev/null
+sudo systemsetup -settimezone "America/Los_Angeles" > /dev/null
 
 # Stop iTunes from responding to the keyboard media keys
 #launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
 # Swap Command and Control keys (Windows-like shortcuts: Ctrl+C to copy, etc.)
-# Uses hidutil to remap: Command <-> Control (both left and right)
-hidutil property --set '{"UserKeyMapping":[
-  {"HIDKeyboardModifierMappingSrc":0x7000000E3,"HIDKeyboardModifierMappingDst":0x7000000E0},
-  {"HIDKeyboardModifierMappingSrc":0x7000000E0,"HIDKeyboardModifierMappingDst":0x7000000E3},
-  {"HIDKeyboardModifierMappingSrc":0x7000000E7,"HIDKeyboardModifierMappingDst":0x7000000E4},
-  {"HIDKeyboardModifierMappingSrc":0x7000000E4,"HIDKeyboardModifierMappingDst":0x7000000E7}
-]}' > /dev/null
-
-# Persist the swap across reboots via LaunchAgent
-LAUNCH_AGENT="$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist"
-mkdir -p "$HOME/Library/LaunchAgents"
-cat > "$LAUNCH_AGENT" << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>com.local.KeyRemapping</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/usr/bin/hidutil</string>
-    <string>property</string>
-    <string>--set</string>
-    <string>{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x7000000E3,"HIDKeyboardModifierMappingDst":0x7000000E0},{"HIDKeyboardModifierMappingSrc":0x7000000E0,"HIDKeyboardModifierMappingDst":0x7000000E3},{"HIDKeyboardModifierMappingSrc":0x7000000E7,"HIDKeyboardModifierMappingDst":0x7000000E4},{"HIDKeyboardModifierMappingSrc":0x7000000E4,"HIDKeyboardModifierMappingDst":0x7000000E7}]}</string>
-  </array>
-  <key>RunAtLoad</key>
-  <true/>
-</dict>
-</plist>
-EOF
+# NOTE: This is configured per-keyboard via System Settings > Keyboard > Keyboard Shortcuts > Modifier Keys
+# The setting is stored in ~/Library/Preferences/ByHost/.GlobalPreferences.*.plist
+# under keys like "com.apple.keyboard.modifiermapping.VENDORID-PRODUCTID-0"
+# This allows different keyboards to have different mappings (e.g. swap on main keyboard but not on Logitech)
+#
+# To configure: System Settings > Keyboard > Keyboard Shortcuts > Modifier Keys
+#   - Select the keyboard from the dropdown
+#   - Set Control (^) Key → Command
+#   - Set Command Key → Control (^)
+#
+# Remove any leftover hidutil LaunchAgent from previous script runs
+if [ -f "$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist" ]; then
+  launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist" 2>/dev/null || true
+  rm -f "$HOME/Library/LaunchAgents/com.local.KeyRemapping.plist"
+  echo "Removed old hidutil key remapping LaunchAgent"
+fi
+# Clear any active hidutil remapping from previous runs
+hidutil property --set '{"UserKeyMapping":[]}' > /dev/null 2>&1 || true
 
 echo "✓ Trackpad, keyboard, and input configured"
 
@@ -332,9 +322,9 @@ defaults write com.apple.finder OpenWindowForNewRemovableDisk -bool true
 /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
 
-# Use list view in all Finder windows by default
-# Four-letter codes for the other view modes: `icnv`, `clmv`, `Flwv`
-defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+# Use column view in all Finder windows by default
+# Four-letter codes for the other view modes: `icnv`, `Nlsv`, `Flwv`
+defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
 # Disable the warning before emptying the Trash
 defaults write com.apple.finder WarnOnEmptyTrash -bool false
@@ -366,11 +356,11 @@ echo "Configuring Dock and hot corners..."
 # Enable highlight hover effect for the grid view of a stack (Dock)
 defaults write com.apple.dock mouse-over-hilite-stack -bool true
 
-# Set the icon size of Dock items to 60 pixels
-defaults write com.apple.dock tilesize -int 60
+# Set the icon size of Dock items to 50 pixels
+defaults write com.apple.dock tilesize -int 50
 
-# Change minimize/maximize window effect
-defaults write com.apple.dock mineffect -string "scale"
+# Reset minimize/maximize window effect to system default (genie)
+defaults delete com.apple.dock mineffect 2>/dev/null || true
 
 # Minimize windows into their application’s icon
 defaults write com.apple.dock minimize-to-application -bool true
@@ -381,9 +371,9 @@ defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
 # Show indicator lights for open applications in the Dock
 defaults write com.apple.dock show-process-indicators -bool true
 
-# Wipe all (default) app icons from the Dock
-# This is only really useful when setting up a new Mac, or if you don’t use the Dock to launch apps.
-defaults write com.apple.dock persistent-apps -array
+# Don't wipe Dock apps — keep whatever is currently pinned
+# To reset Dock to defaults on a fresh install, uncomment:
+# defaults write com.apple.dock persistent-apps -array
 
 # Show only open applications in the Dock
 #defaults write com.apple.dock static-only -bool true
@@ -400,8 +390,8 @@ defaults write com.apple.dock expose-group-by-app -bool false
 
 # NOTE: Dashboard was removed in macOS Catalina — no settings needed
 
-# Don’t automatically rearrange Spaces based on most recent use
-defaults write com.apple.dock mru-spaces -bool false
+# Reset auto-rearrange Spaces to system default (enabled)
+defaults delete com.apple.dock mru-spaces 2>/dev/null || true
 
 # Remove the auto-hiding Dock delay
 defaults write com.apple.dock autohide-delay -float 0
@@ -414,8 +404,8 @@ defaults write com.apple.dock autohide-time-modifier -float 0
 # Make Dock icons of hidden applications translucent
 defaults write com.apple.dock showhidden -bool true
 
-# Don’t show recent applications in Dock
-defaults write com.apple.dock show-recents -bool false
+# Reset show recent applications in Dock to system default (enabled)
+defaults delete com.apple.dock show-recents 2>/dev/null || true
 
 # Disable the Launchpad gesture (pinch with thumb and three fingers)
 defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
@@ -569,7 +559,9 @@ sudo mdutil -i on / > /dev/null
 # Rebuild the index from scratch
 sudo mdutil -E / > /dev/null
 
-# Set Spotlight shortcut to Control+Space (matches physical key position after Command<->Control swap)
+# Set Spotlight shortcut to Control+Space
+# Since Cmd↔Ctrl are swapped per-keyboard via System Settings, the physical
+# Command key sends Control — so Ctrl+Space keeps the same finger position
 # Key combo: Control (262144 = 0x40000) + Space (keyCode 49)
 defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 \
   "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
