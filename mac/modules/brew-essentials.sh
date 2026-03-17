@@ -58,6 +58,10 @@ if command -v fnm &> /dev/null; then
   fnm default lts-latest
 fi
 
+# Install nx globally
+npm install --global npm || true
+npm install --global nx || true
+
 # .NET SDK (latest LTS version)
 brew install --cask dotnet-sdk || true
 

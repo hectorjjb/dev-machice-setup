@@ -183,6 +183,14 @@ catch {
     Write-Output "Error enabling git lfs: $_"
 }
 
+# Install nx globally
+try {
+    npm install --global nx
+}
+catch {
+    Write-Output "Error installing nx: $_"
+}
+
 # Install Azure DevOps (formerly VSTS) Auth helper for npm
 try {
     npm install -g vsts-npm-auth --registry https://registry.npmjs.com --always-auth false

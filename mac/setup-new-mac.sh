@@ -6,6 +6,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 echo "=== Setup new macOS ==="
 echo ""
 
+# Ask for the administrator password once upfront
+sudo -v
+
+# Keep-alive: refresh sudo timestamp in the background until this script exits
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+SUDO_KEEPALIVE_PID=$!
+
 # 1. Apply macOS system preferences
 echo ">>> Applying macOS system settings..."
 bash "$SCRIPT_DIR/modules/configure-macos.sh"
@@ -25,6 +32,9 @@ echo ""
 echo ">>> Setting up Zsh..."
 bash "$SCRIPT_DIR/modules/install-zsh.sh"
 echo ""
+
+# Stop the sudo keep-alive background process
+kill "$SUDO_KEEPALIVE_PID" 2>/dev/null
 
 echo "=== Setup complete! ==="
 echo "Please restart your Mac for all changes to take effect."
