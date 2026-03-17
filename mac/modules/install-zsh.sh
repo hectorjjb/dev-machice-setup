@@ -98,6 +98,19 @@ else
   echo "Added plugins: git z zsh-autosuggestions node"
 fi
 
+# --- Override agnoster blue segments with yellow for contrast ---
+AGNOSTER_OVERRIDE='prompt_dir() { prompt_segment yellow black "%~" }'
+# Remove any previous override
+sed -i '' '/^prompt_dir().*prompt_segment/d' "$ZSHRC"
+# Add override after oh-my-zsh is sourced
+if ! grep -q 'prompt_dir()' "$ZSHRC"; then
+  # Insert after 'source $ZSH/oh-my-zsh.sh'
+  sed -i '' "/^source \$ZSH\/oh-my-zsh.sh/a\\
+$AGNOSTER_OVERRIDE
+" "$ZSHRC"
+  echo "Set prompt directory color to yellow"
+fi
+
 # --- Source zsh-syntax-highlighting at the end (must be last) ---
 SYNTAX_SOURCE="source \"\${ZSH_CUSTOM:-\$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh\""
 # Remove any old syntax-highlighting source lines (various path formats from previous runs)
