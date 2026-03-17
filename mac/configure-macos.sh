@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Close any open System Preferences panes, to prevent them from overriding settings we’re about to change
-osascript -e 'tell application "System Preferences" to quit'
+# Close any open System Settings panes, to prevent them from overriding settings we're about to change
+osascript -e 'tell application "System Settings" to quit'
 
 # Ask for the administrator password upfront
 sudo -v
@@ -12,12 +12,29 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 ###############################################################################
 # General UI/UX                                                               #
 ###############################################################################
+echo "Configuring General UI/UX..."
 
-# Set computer name (as done via System Preferences → Sharing)
-sudo scutil --set ComputerName "Hector's Macbook"
-sudo scutil --set HostName "Hector's Macbook"
-sudo scutil --set LocalHostName "Hector-macbook"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "Hector's Macbook"
+# Detect hardware model and set computer name suffix
+MODEL_NAME=$(system_profiler SPHardwareDataType | awk -F': ' '/Model Name/{print $2}')
+case "$MODEL_NAME" in
+  *"MacBook Air"*)  MODEL_SUFFIX="Macbook-Air";;
+  *"MacBook Pro"*)  MODEL_SUFFIX="Macbook-Pro";;
+  *"MacBook"*)      MODEL_SUFFIX="Macbook";;
+  *"Mac mini"*)     MODEL_SUFFIX="Mac-Mini";;
+  *"Mac Pro"*)      MODEL_SUFFIX="Mac-Pro";;
+  *"Mac Studio"*)   MODEL_SUFFIX="Mac-Studio";;
+  *"iMac"*)         MODEL_SUFFIX="iMac";;
+  *)                MODEL_SUFFIX="Mac";;
+esac
+
+COMPUTER_NAME="${MODEL_SUFFIX}"
+
+# Set computer name (as done via System Settings → General → Sharing)
+sudo scutil --set ComputerName "$COMPUTER_NAME"
+sudo scutil --set HostName "$COMPUTER_NAME"
+sudo scutil --set LocalHostName "$COMPUTER_NAME"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$COMPUTER_NAME"
+echo "Computer name set to: $COMPUTER_NAME"
 
 # Disable the sound effects on boot
 # sudo nvram SystemAudioVolume=" "
@@ -50,10 +67,12 @@ defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
 # defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 
 # Disable the “Are you sure you want to open this application?” dialog
-defaults write com.apple.LaunchServices LSQuarantine -bool false
+# WARNING: This disables Gatekeeper protections — security risk on a fresh machine
+# defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-# Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+# Remove duplicates in the "Open With" menu (also see `lscleanup` alias)
+# NOTE: This rebuilds the entire Launch Services database and is slow — run manually if needed
+# /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
 
 # Display ASCII control characters using caret notation in standard text views
 # Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
@@ -67,13 +86,11 @@ defaults write com.apple.LaunchServices LSQuarantine -bool false
 sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo HostName
 
 # Restart automatically if the computer freezes
-sudo systemsetup -setrestartfreeze on
+# (systemsetup is deprecated since macOS 12.3; use pmset instead)
+sudo pmset -a restartafterfreeze 1
 
 # Never go into computer sleep mode
 # sudo systemsetup -setcomputersleep Off > /dev/null
-
-# Disable Notification Center and remove the menu bar icon
-launchctl unload -w /System/Library/LaunchAgents/com.apple.notificationcenterui.plist 2> /dev/null
 
 # Disable automatic capitalization as it’s annoying when typing code
 defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
@@ -96,35 +113,36 @@ defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
 #sudo rm -rf /System/Library/CoreServices/DefaultDesktop.jpg
 #sudo ln -s /path/to/your/image /System/Library/CoreServices/DefaultDesktop.jpg
 
-###############################################################################
-# SSD-specific tweaks                                                         #
-###############################################################################
+echo "✓ General UI/UX configured"
 
-# Disable hibernation (speeds up entering sleep mode)
-sudo pmset -a hibernatemode 0
+###############################################################################
+# Power management                                                            #
+###############################################################################
+echo "Configuring Power management..."
 
-# Commented out because this doesn't work. Operation not permitted error.
-# Remove the sleep image file to save disk space
-# sudo rm /private/var/vm/sleepimage
-# Create a zero-byte file instead…
-# sudo touch /private/var/vm/sleepimage
-# …and make sure it can’t be rewritten
-# sudo chflags uchg /private/var/vm/sleepimage
+# NOTE: On Apple Silicon Macs, hibernation is managed by the system and
+# changing hibernatemode is not recommended. Only uncomment on Intel Macs.
+# sudo pmset -a hibernatemode 0
+
+echo "✓ Power management configured"
 
 ###############################################################################
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
 ###############################################################################
+echo "Configuring Trackpad, keyboard, and input..."
 
 # Trackpad: enable tap to click for this user and for the login screen
+defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-
+# Trackpad: enable three-finger drag
+defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
 # Disable “natural” (Lion-style) scrolling
 defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 
-# Increase sound quality for Bluetooth headphones/headsets
-defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
+# NOTE: Bluetooth SBC bitpool tuning is obsolete on modern macOS (AAC/LC3 codecs are used)
 
 # Enable full keyboard access for all controls
 # (e.g. enable Tab in modal dialogs)
@@ -143,7 +161,7 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 # 1 => 15ms
 # 10 => 150ms
 # https://apple.stackexchange.com/questions/10467/how-to-increase-keyboard-key-repeat-rate-on-os-x
-defaults write NSGlobalDomain KeyRepeat -int 1
+defaults write NSGlobalDomain KeyRepeat -int 2
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
 
 # Set language and text formats
@@ -158,14 +176,18 @@ defaults write NSGlobalDomain InitialKeyRepeat -int 15
 sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
 # Set the timezone; see `sudo systemsetup -listtimezones` for other values
+# (systemsetup is deprecated since macOS 12.3 but timezone setting still works)
 sudo systemsetup -settimezone "Asia/Singapore" > /dev/null
 
 # Stop iTunes from responding to the keyboard media keys
 #launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
+echo "✓ Trackpad, keyboard, and input configured"
+
 ###############################################################################
 # Screen                                                                      #
 ###############################################################################
+echo "Configuring Screen settings..."
 
 # Require password immediately after sleep or screen saver begins
 defaults write com.apple.screensaver askForPassword -int 1
@@ -180,16 +202,18 @@ defaults write com.apple.screencapture type -string "png"
 # Disable shadow in screenshots
 defaults write com.apple.screencapture disable-shadow -bool true
 
-# Enable subpixel font rendering on non-Apple LCDs
-# Reference: https://github.com/kevinSuttle/macOS-Defaults/issues/17#issuecomment-266633501
-defaults write NSGlobalDomain AppleFontSmoothing -int 1
+# NOTE: Subpixel font rendering (AppleFontSmoothing) was removed in macOS Mojave
+# and is a no-op on all Retina/Apple Silicon Macs.
 
-# Enable HiDPI display modes (requires restart)
-sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutionEnabled -bool true
+# NOTE: HiDPI display modes are native on all Apple Silicon and modern Macs.
+# DisplayResolutionEnabled is no longer needed.
+
+echo "✓ Screen settings configured"
 
 ###############################################################################
 # Finder                                                                      #
 ###############################################################################
+echo "Configuring Finder..."
 
 # Finder: allow quitting via ⌘ + Q; doing so will also hide desktop icons
 defaults write com.apple.finder QuitMenuItem -bool true
@@ -243,9 +267,10 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
 # Disable disk image verification
-defaults write com.apple.frameworks.diskimages skip-verify -bool true
-defaults write com.apple.frameworks.diskimages skip-verify-locked -bool true
-defaults write com.apple.frameworks.diskimages skip-verify-remote -bool true
+# WARNING: Skipping verification allows tampered .dmg files to install silently
+# defaults write com.apple.frameworks.diskimages skip-verify -bool true
+# defaults write com.apple.frameworks.diskimages skip-verify-locked -bool true
+# defaults write com.apple.frameworks.diskimages skip-verify-remote -bool true
 
 # Automatically open a new Finder window when a volume is mounted
 defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true
@@ -291,9 +316,6 @@ chflags nohidden ~/Library
 # Show the /Volumes folder
 sudo chflags nohidden /Volumes
 
-# Remove Dropbox’s green checkmark icons in Finder
-file=/Applications/Dropbox.app/Contents/Resources/emblem-dropbox-uptodate.icns
-[ -e "${file}" ] && mv -f "${file}" "${file}.bak"
 
 # Expand the following File Info panes:
 # “General”, “Open with”, and “Sharing & Permissions”
@@ -302,9 +324,12 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 	OpenWith -bool true \
 	Privileges -bool true
 
+echo "✓ Finder configured"
+
 ###############################################################################
-# Dock, Dashboard, and hot corners                                            #
+# Dock and hot corners                                                        #
 ###############################################################################
+echo "Configuring Dock and hot corners..."
 
 # Enable highlight hover effect for the grid view of a stack (Dock)
 defaults write com.apple.dock mouse-over-hilite-stack -bool true
@@ -341,11 +366,7 @@ defaults write com.apple.dock expose-animation-duration -float 0.1
 # (i.e. use the old Exposé behavior instead)
 defaults write com.apple.dock expose-group-by-app -bool false
 
-# Disable Dashboard
-defaults write com.apple.dashboard mcx-disabled -bool true
-
-# Don’t show Dashboard as a Space
-defaults write com.apple.dock dashboard-in-overlay -bool true
+# NOTE: Dashboard was removed in macOS Catalina — no settings needed
 
 # Don’t automatically rearrange Spaces based on most recent use
 defaults write com.apple.dock mru-spaces -bool false
@@ -370,18 +391,19 @@ defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
 # Reset Launchpad, but keep the desktop wallpaper intact
 find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete
 
-# Add iOS & Watch Simulator to Launchpad
-sudo ln -sf "/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app" "/Applications/Simulator.app"
-sudo ln -sf "/Applications/Xcode.app/Contents/Developer/Applications/Simulator (Watch).app" "/Applications/Simulator (Watch).app"
+# NOTE: Xcode simulators are registered automatically in modern macOS — manual symlinks not needed
 
 # Add a spacer to the left side of the Dock (where the applications are)
 #defaults write com.apple.dock persistent-apps -array-add '{tile-data={}; tile-type="spacer-tile";}'
 # Add a spacer to the right side of the Dock (where the Trash is)
 #defaults write com.apple.dock persistent-others -array-add '{tile-data={}; tile-type="spacer-tile";}'
 
+echo "✓ Dock and hot corners configured"
+
 ###############################################################################
 # Safari & WebKit                                                             #
 ###############################################################################
+echo "Configuring Safari & WebKit..."
 
 # Privacy: don’t send search queries to Apple
 defaults write com.apple.Safari UniversalSearchEnabled -bool false
@@ -444,13 +466,7 @@ defaults write com.apple.Safari AutoFillMiscellaneousForms -bool false
 # Warn about fraudulent websites
 defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
 
-# Disable plug-ins
-defaults write com.apple.Safari WebKitPluginsEnabled -bool false
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled -bool false
-
-# Disable Java
-defaults write com.apple.Safari WebKitJavaEnabled -bool false
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled -bool false
+# NOTE: NPAPI plugins and Java applets were removed from Safari years ago — no settings needed
 
 # Block pop-up windows
 defaults write com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool false
@@ -462,17 +478,20 @@ defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebK
 #defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
 #defaults write com.apple.SafariTechnologyPreview com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
 
-# Enable “Do Not Track”
-defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
+# NOTE: "Do Not Track" header is effectively dead and ignored by most sites
+# defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
 
 # Update extensions automatically
 defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
+echo "✓ Safari & WebKit configured"
+
 ###############################################################################
 # Spotlight                                                                   #
 ###############################################################################
+echo "Configuring Spotlight..."
 
-# Hide Spotlight tray-icon (and subsequent helper)
-sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search
+# NOTE: Spotlight icon cannot be hidden via chmod on sealed system volume (SIP)
+# Use System Settings > Control Center to manage menu bar items instead
 
 # Disable Spotlight indexing for any volume that gets mounted and has not yet
 # been indexed before.
@@ -518,12 +537,19 @@ sudo mdutil -i on / > /dev/null
 # Rebuild the index from scratch
 sudo mdutil -E / > /dev/null
 
+echo "✓ Spotlight configured"
+
 ###############################################################################
 # Terminal & iTerm 2                                                          #
 ###############################################################################
+echo "Configuring Terminal & iTerm..."
 
 # Only use UTF-8 in Terminal.app
 defaults write com.apple.terminal StringEncodings -array 4
+
+# Set "Pro" as the default profile in Terminal.app
+defaults write com.apple.terminal "Default Window Settings" -string "Pro"
+defaults write com.apple.terminal "Startup Window Settings" -string "Pro"
 
 # Enable “focus follows mouse” for Terminal.app and all X11 apps
 # i.e. hover over a window and start typing in it without clicking first
@@ -540,9 +566,12 @@ defaults write com.apple.Terminal ShowLineMarks -int 0
 # Don’t display the annoying prompt when quitting iTerm
 defaults write com.googlecode.iterm2 PromptOnQuit -bool false
 
+echo "✓ Terminal & iTerm configured"
+
 ###############################################################################
 # Time Machine                                                                #
 ###############################################################################
+echo "Configuring Time Machine..."
 
 # Prevent Time Machine from prompting to use new hard drives as backup volume
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
@@ -551,9 +580,12 @@ defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 # Commented because: disablelocal: Unrecognized verb.
 # hash tmutil &> /dev/null && sudo tmutil disablelocal
 
+echo "✓ Time Machine configured"
+
 ###############################################################################
 # Activity Monitor                                                            #
 ###############################################################################
+echo "Configuring Activity Monitor..."
 
 # Show the main window when launching Activity Monitor
 defaults write com.apple.ActivityMonitor OpenMainWindow -bool true
@@ -568,18 +600,17 @@ defaults write com.apple.ActivityMonitor ShowCategory -int 0
 defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
 
-###############################################################################
-# Address Book, Dashboard, iCal, TextEdit, and Disk Utility                   #
-###############################################################################
+echo "✓ Activity Monitor configured"
 
-# Enable the debug menu in Address Book
+###############################################################################
+# Contacts, TextEdit, and Disk Utility                                        #
+###############################################################################
+echo "Configuring Contacts, TextEdit, and Disk Utility..."
+
+# Enable the debug menu in Contacts
 defaults write com.apple.addressbook ABShowDebugMenu -bool true
 
-# Enable Dashboard dev mode (allows keeping widgets on the desktop)
-defaults write com.apple.dashboard devmode -bool true
-
-# Enable the debug menu in iCal (pre-10.8)
-defaults write com.apple.iCal IncludeDebugMenu -bool true
+# NOTE: Dashboard was removed in macOS Catalina — devmode setting removed
 
 # Use plain text mode for new TextEdit documents
 defaults write com.apple.TextEdit RichText -int 0
@@ -594,9 +625,12 @@ defaults write com.apple.DiskUtility advanced-image-options -bool true
 # Auto-play videos when opened with QuickTime Player
 defaults write com.apple.QuickTimePlayerX MGPlayMovieOnOpen -bool true
 
+echo "✓ Contacts, TextEdit, and Disk Utility configured"
+
 ###############################################################################
 # Mac App Store                                                               #
 ###############################################################################
+echo "Configuring Mac App Store..."
 
 # Enable the WebKit Developer Tools in the Mac App Store
 defaults write com.apple.appstore WebKitDeveloperExtras -bool true
@@ -625,16 +659,22 @@ defaults write com.apple.commerce AutoUpdate -bool true
 # Allow the App Store to reboot machine on macOS updates
 defaults write com.apple.commerce AutoUpdateRestartRequired -bool true
 
+echo "✓ Mac App Store configured"
+
 ###############################################################################
 # Photos                                                                      #
 ###############################################################################
+echo "Configuring Photos..."
 
 # Prevent Photos from opening automatically when devices are plugged in
 defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
+echo "✓ Photos configured"
+
 ###############################################################################
 # Messages                                                                    #
 ###############################################################################
+echo "Configuring Messages..."
 
 # Disable automatic emoji substitution (i.e. use plain text smileys)
 defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "automaticEmojiSubstitutionEnablediMessage" -bool false
@@ -645,9 +685,12 @@ defaults write com.apple.messageshelper.MessageController SOInputLineSettings -d
 # Disable continuous spell checking
 defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "continuousSpellCheckingEnabled" -bool false
 
+echo "✓ Messages configured"
+
 ###############################################################################
 # Google Chrome & Google Chrome Canary                                        #
 ###############################################################################
+echo "Configuring Google Chrome..."
 
 # Disable the all too sensitive backswipe on trackpads
 defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool false
@@ -665,32 +708,55 @@ defaults write com.google.Chrome.canary DisablePrintPreview -bool true
 defaults write com.google.Chrome PMPrintingExpandedStateForPrint2 -bool true
 defaults write com.google.Chrome.canary PMPrintingExpandedStateForPrint2 -bool true
 
+echo "✓ Google Chrome configured"
+
+###############################################################################
+# Modern macOS settings (macOS 13+)                                           #
+###############################################################################
+echo "Configuring Modern macOS settings..."
+
+# Disable Stage Manager (set to true to enable)
+defaults write com.apple.WindowManager GloballyEnabled -bool false
+
+# Show battery percentage in menu bar
+defaults write com.apple.menuextra.battery ShowPercent -string "YES"
+
+echo "✓ Modern macOS settings configured"
+
+###############################################################################
+# Security                                                                    #
+###############################################################################
+echo "Configuring Security..."
+
+# Enable the macOS firewall
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+
+# Check FileVault status (enable manually via System Settings > Privacy & Security if off)
+echo "FileVault status:"
+fdesetup status
+
+echo "✓ Security configured"
+
 ###############################################################################
 # Kill affected applications                                                  #
 ###############################################################################
+echo "Restarting affected applications..."
+
+# Restart cfprefsd first to flush preferences to disk
+killall "cfprefsd" &> /dev/null
+sleep 1
 
 for app in "Activity Monitor" \
-	"Address Book" \
 	"Calendar" \
-	"cfprefsd" \
 	"Contacts" \
 	"Dock" \
 	"Finder" \
-	"Google Chrome Canary" \
 	"Google Chrome" \
 	"Mail" \
 	"Messages" \
-	"Opera" \
 	"Photos" \
 	"Safari" \
-	"SizeUp" \
-	"Spectacle" \
-	"SystemUIServer" \
-	"Terminal" \
-	"Transmission" \
-	"Tweetbot" \
-	"Twitter" \
-	"iCal"; do
+	"SystemUIServer"; do
 	killall "${app}" &> /dev/null
 done
-echo "Done. Note that some of these changes require a logout/restart to take effect."
+echo "✓ Done. Note that some of these changes require a logout/restart to take effect."
