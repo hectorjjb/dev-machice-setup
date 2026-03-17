@@ -26,13 +26,13 @@ BREW_PREFIX=$(brew --prefix)
 # Casks are built-in since Homebrew 4.0 — no need for `brew tap homebrew/cask`
 
 ## Apps I use
-brew install --cask --no-quarantine spotify || true
-brew install --cask --no-quarantine visual-studio-code || true
-brew install --cask --no-quarantine whatsapp || true
-brew install --cask --no-quarantine vlc || true
-brew install --cask --no-quarantine microsoft-edge || true
-brew install --cask --no-quarantine microsoft-teams || true
-brew install --cask --no-quarantine github || true
+brew install --cask spotify || true
+brew install --cask visual-studio-code || true
+brew install --cask whatsapp || true
+brew install --cask vlc || true
+brew install --cask microsoft-edge || true
+brew install --cask microsoft-teams || true
+brew install --cask github || true
 
 brew install wget || true
 brew install git || true

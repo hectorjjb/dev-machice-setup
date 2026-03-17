@@ -75,16 +75,16 @@ sed -i '' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$ZSHRC"
 
 echo "✓ Repaired stale entries from previous runs"
 
-# --- Set theme to "apple" ---
+# --- Set theme to "agnoster" ---
 if grep -q '^ZSH_THEME=' "$ZSHRC"; then
-  sed -i '' 's/^ZSH_THEME=.*/ZSH_THEME="apple"/' "$ZSHRC"
-  echo "Set theme to apple"
+  sed -i '' 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' "$ZSHRC"
+  echo "Set theme to agnoster"
 else
   # Insert after the ZSH export line
   sed -i '' '/^export ZSH=/a\
-ZSH_THEME="apple"
+ZSH_THEME="agnoster"
 ' "$ZSHRC"
-  echo "Added theme apple"
+  echo "Added theme agnoster"
 fi
 
 # --- Set plugins: git z zsh-autosuggestions node ---

@@ -29,7 +29,7 @@ esac
 
 COMPUTER_NAME="Hector's ${MODEL_SUFFIX}"
 # LocalHostName must be DNS-safe: no spaces, no apostrophes
-LOCAL_NAME="Hectors-${MODEL_SUFFIX// /-}"
+LOCAL_NAME="${MODEL_SUFFIX// /-}"
 
 # Set computer name (as done via System Settings → General → Sharing)
 sudo scutil --set ComputerName "$COMPUTER_NAME"
@@ -591,7 +591,42 @@ defaults write com.apple.terminal SecureKeyboardEntry -bool true
 
 # Disable the annoying line marks
 defaults write com.apple.Terminal ShowLineMarks -int 0
+# Set font to FiraCode Nerd Font in Terminal.app's "Pro" profile
+FONT_NAME="FiraCode Nerd Font Mono"
+FONT_SIZE=14
+/usr/libexec/PlistBuddy -c "Set ':Window Settings:Pro:Font' $(python3 -c "
+import sys
+try:
+    from AppKit import NSFont
+    from Foundation import NSKeyedArchiver
+    font = NSFont.fontWithName_size_('${FONT_NAME}', ${FONT_SIZE})
+    if font is None:
+        sys.exit(1)
+    data = NSKeyedArchiver.archivedDataWithRootObject_(font)
+    sys.stdout.buffer.write(data)
+except Exception:
+    sys.exit(1)
+" | base64)" "$HOME/Library/Preferences/com.apple.Terminal.plist" 2>/dev/null || \
+  echo "⚠ Could not set Terminal.app font (font may not be installed yet — re-run after brew install)"
 
+# Set font in VS Code settings
+VSCODE_SETTINGS="$HOME/Library/Application Support/Code/User/settings.json"
+if [ -f "$VSCODE_SETTINGS" ]; then
+  # Use python3 to safely update the JSON
+  python3 -c "
+import json, sys
+path = sys.argv[1]
+with open(path) as f:
+    settings = json.load(f)
+settings['terminal.integrated.fontFamily'] = '${FONT_NAME}'
+with open(path, 'w') as f:
+    json.dump(settings, f, indent=4)
+" "$VSCODE_SETTINGS" && echo "Set VS Code terminal font to ${FONT_NAME}" || echo "⚠ Could not update VS Code settings"
+else
+  mkdir -p "$HOME/Library/Application Support/Code/User"
+  echo '{ "terminal.integrated.fontFamily": "'"${FONT_NAME}"'" }' > "$VSCODE_SETTINGS"
+  echo "Created VS Code settings with terminal font ${FONT_NAME}"
+fi
 # Don’t display the annoying prompt when quitting iTerm
 defaults write com.googlecode.iterm2 PromptOnQuit -bool false
 
