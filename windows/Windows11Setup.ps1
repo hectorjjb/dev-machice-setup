@@ -49,7 +49,7 @@ $apps = @(
     # @{name = "Microsoft.Azure.StorageExplorer" }, 
     @{name = "XP89DCGQ3K6VLD"; source = "msstore" },    # Microsoft PowerToys
     @{name = "GitHub.GitLFS" },
-    @{name = "OpenJS.NodeJS.LTS"  },
+    @{name = "OpenJS.NodeJS.LTS" },
     @{name = "Microsoft.DotNet.SDK.8" },
     @{name = "Canonical.Ubuntu.2204" },
     @{name = "XP8K0HKJFRXGCK"; source = "msstore" },    # oh-my-posh
