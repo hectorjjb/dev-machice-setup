@@ -198,3 +198,48 @@ try {
 catch {
     Write-Output "Error installing Azure DevOps (formerly VSTS) Auth helper for npm: $_"
 }
+
+###############################################################################
+# Oh My Posh configuration                                                    #
+###############################################################################
+
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Copy mt.omp.json theme to Oh My Posh themes directory
+try {
+    $themeSrc = Join-Path $ScriptDir "config\mt.omp.json"
+    $themeDst = Join-Path $env:POSH_THEMES_PATH "mt.omp.json"
+    if ($env:POSH_THEMES_PATH -and (Test-Path $env:POSH_THEMES_PATH)) {
+        Copy-Item -Path $themeSrc -Destination $themeDst -Force
+        Write-Host "Copied mt.omp.json to $themeDst"
+    }
+    else {
+        Write-Host "POSH_THEMES_PATH not set or not found — skipping theme copy"
+    }
+}
+catch {
+    Write-Output "Error copying Oh My Posh theme: $_"
+}
+
+# Install CaskaydiaCove Nerd Font via Oh My Posh
+try {
+    oh-my-posh font install CascadiaCode
+    Write-Host "Installed CaskaydiaCove Nerd Font"
+}
+catch {
+    Write-Output "Error installing Nerd Font: $_"
+}
+
+# Configure PowerShell profile for Oh My Posh
+try {
+    $profileSrc = Join-Path $ScriptDir "config\Microsoft.PowerShell_profile.ps1"
+    $profileDir = Split-Path -Parent $PROFILE.CurrentUserAllHosts
+    if (-not (Test-Path $profileDir)) {
+        New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+    }
+    Copy-Item -Path $profileSrc -Destination $PROFILE.CurrentUserAllHosts -Force
+    Write-Host "Configured PowerShell profile at $($PROFILE.CurrentUserAllHosts)"
+}
+catch {
+    Write-Output "Error configuring PowerShell profile: $_"
+}

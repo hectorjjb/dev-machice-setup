@@ -49,6 +49,10 @@ brew install fzf || true
 
 # Fonts
 brew install --cask font-fira-code-nerd-font || true
+brew install --cask font-caskaydia-cove-nerd-font || true
+
+# Oh My Posh prompt
+brew install jandedobbeleer/oh-my-posh/oh-my-posh || true
 
 # Node.js (latest LTS version via fnm)
 brew install fnm || true

@@ -75,7 +75,7 @@ sed -i '' -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$ZSHRC"
 
 echo "✓ Repaired stale entries from previous runs"
 
-# --- Set theme to "agnoster" ---
+# --- Set theme to "agnoster" (Oh My Zsh fallback) ---
 if grep -q '^ZSH_THEME=' "$ZSHRC"; then
   sed -i '' 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' "$ZSHRC"
   echo "Set theme to agnoster"
@@ -85,6 +85,31 @@ else
 ZSH_THEME="agnoster"
 ' "$ZSHRC"
   echo "Added theme agnoster"
+fi
+
+# --- Oh My Posh (overrides ZSH_THEME when available) ---
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+OMP_CONFIG_DIR="$HOME/.config/omp"
+OMP_THEME="$OMP_CONFIG_DIR/mt.omp.json"
+
+if command -v oh-my-posh &> /dev/null; then
+  mkdir -p "$OMP_CONFIG_DIR"
+  cp "$SCRIPT_DIR/../config/mt.omp.json" "$OMP_THEME"
+  echo "Copied Oh My Posh theme to $OMP_THEME"
+
+  # Add Oh My Posh init to .zshrc (idempotent)
+  if ! grep -q 'oh-my-posh init zsh' "$ZSHRC"; then
+    echo '' >> "$ZSHRC"
+    echo '# Oh My Posh' >> "$ZSHRC"
+    echo 'eval "$(oh-my-posh init zsh --config ~/.config/omp/mt.omp.json)"' >> "$ZSHRC"
+    echo '' >> "$ZSHRC"
+    echo 'clear' >> "$ZSHRC"
+    echo "Added Oh My Posh init to ~/.zshrc"
+  else
+    echo "Oh My Posh init already in ~/.zshrc — skipping"
+  fi
+else
+  echo "oh-my-posh not found — skipping prompt config"
 fi
 
 # --- Set plugins: git z zsh-autosuggestions node ---
