@@ -508,20 +508,27 @@ defaults write com.apple.Terminal ShowLineMarks -int 0
 # Set font to FiraCode Nerd Font in Terminal.app's "Pro" profile
 FONT_NAME="FiraCode Nerd Font Mono"
 FONT_SIZE=14
-/usr/libexec/PlistBuddy -c "Set ':Window Settings:Pro:Font' $(python3 -c "
-import sys
+python3 -c "
+import plistlib, sys, os
 try:
     from AppKit import NSFont
     from Foundation import NSKeyedArchiver
     font = NSFont.fontWithName_size_('${FONT_NAME}', ${FONT_SIZE})
     if font is None:
+        print('⚠ Font ${FONT_NAME} not found — is it installed?')
         sys.exit(1)
-    data = NSKeyedArchiver.archivedDataWithRootObject_(font)
-    sys.stdout.buffer.write(data)
-except Exception:
+    font_data = bytes(NSKeyedArchiver.archivedDataWithRootObject_(font))
+    plist_path = os.path.expanduser('~/Library/Preferences/com.apple.Terminal.plist')
+    with open(plist_path, 'rb') as f:
+        plist = plistlib.load(f)
+    plist.setdefault('Window Settings', {}).setdefault('Pro', {})['Font'] = font_data
+    with open(plist_path, 'wb') as f:
+        plistlib.dump(plist, f)
+    print('Set Terminal.app Pro font to ${FONT_NAME} ${FONT_SIZE}pt')
+except Exception as e:
+    print(f'⚠ Could not set Terminal.app font: {e}')
     sys.exit(1)
-" | base64)" "$HOME/Library/Preferences/com.apple.Terminal.plist" 2>/dev/null || \
-  echo "⚠ Could not set Terminal.app font (font may not be installed yet — re-run after brew install)"
+" || true
 
 # Set font in VS Code settings
 # VS Code uses JSONC (JSON with comments & trailing commas), so we use a

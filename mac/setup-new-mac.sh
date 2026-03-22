@@ -13,14 +13,14 @@ sudo -v
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 SUDO_KEEPALIVE_PID=$!
 
-# 1. Apply macOS system preferences
-echo ">>> Applying macOS system settings..."
-bash "$SCRIPT_DIR/modules/configure-macos.sh"
-echo ""
-
-# 2. Install Homebrew and essential packages
+# 1. Install Homebrew and essential packages (including fonts)
 echo ">>> Installing Homebrew and essentials..."
 bash "$SCRIPT_DIR/modules/brew-essentials.sh"
+echo ""
+
+# 2. Apply macOS system preferences (needs fonts from step 1)
+echo ">>> Applying macOS system settings..."
+bash "$SCRIPT_DIR/modules/configure-macos.sh"
 echo ""
 
 # 3. Install App Store apps
