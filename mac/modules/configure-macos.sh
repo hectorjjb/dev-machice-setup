@@ -505,8 +505,8 @@ defaults write com.apple.terminal SecureKeyboardEntry -bool true
 
 # Disable the annoying line marks
 defaults write com.apple.Terminal ShowLineMarks -int 0
-# Set font to FiraCode Nerd Font in Terminal.app's "Pro" profile
-FONT_NAME="FiraCode Nerd Font Mono"
+# Set font to CaskaydiaCove Nerd Font in Terminal.app's "Pro" profile
+FONT_NAME="CaskaydiaCove Nerd Font Mono"
 FONT_SIZE=14
 python3 -c "
 import plistlib, sys, os
