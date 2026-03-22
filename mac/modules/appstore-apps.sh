@@ -17,10 +17,10 @@ echo "Installing App Store apps..."
 # Find app IDs with: mas search "App Name"
 # Examples (free apps):
 mas install 497799835  || true  # Xcode
-# Remove unwanted pre-installed apps
-mas uninstall 409201541  || true  # Pages
-mas uninstall 409203825  || true  # Numbers
-mas uninstall 409183694  || true  # Keynote
+# Remove unwanted pre-installed apps (only if installed)
+mas list | grep -q 409201541 && mas uninstall 409201541 || true  # Pages
+mas list | grep -q 409203825 && mas uninstall 409203825 || true  # Numbers
+mas list | grep -q 409183694 && mas uninstall 409183694 || true  # Keynote
 
 mas install 462054704  || true  # Microsoft Word
 mas install 462058435  || true  # Microsoft Excel

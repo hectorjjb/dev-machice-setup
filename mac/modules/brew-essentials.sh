@@ -26,12 +26,14 @@ BREW_PREFIX=$(brew --prefix)
 # Casks are built-in since Homebrew 4.0 — no need for `brew tap homebrew/cask`
 
 ## Apps I use
-brew install --cask spotify || true
-brew install --cask visual-studio-code || true
-brew install --cask vlc || true
-brew install --cask microsoft-edge || true
-brew install --cask microsoft-teams || true
-brew install --cask github || true
+CASK_APPS=(spotify visual-studio-code vlc microsoft-edge microsoft-teams github)
+for cask in "${CASK_APPS[@]}"; do
+  if brew list --cask "$cask" &>/dev/null; then
+    echo "Already installed: $cask"
+  else
+    brew install --cask "$cask" || true
+  fi
+done
 
 brew install mas || true
 brew install wget || true
