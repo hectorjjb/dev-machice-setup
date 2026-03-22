@@ -86,9 +86,6 @@ defaults delete NSGlobalDomain PMPrintingExpandedStateForPrint2 2>/dev/null || t
 # in the login window
 sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo HostName
 
-# Restart automatically after a kernel panic (wait 15 seconds before restarting)
-# (systemsetup is deprecated since macOS 12.3; use pmset instead)
-sudo pmset -a panicrestart 15
 
 # Never go into computer sleep mode
 # sudo systemsetup -setcomputersleep Off > /dev/null
