@@ -112,6 +112,20 @@ else
   echo "oh-my-posh not found — skipping prompt config"
 fi
 
+# --- fnm (Fast Node Manager) — adds node/npm/npx to PATH ---
+if command -v fnm &> /dev/null; then
+  if ! grep -q 'fnm env' "$ZSHRC"; then
+    echo '' >> "$ZSHRC"
+    echo '# fnm (Node.js version manager)' >> "$ZSHRC"
+    echo 'eval "$(fnm env --use-on-cd --shell zsh)"' >> "$ZSHRC"
+    echo "Added fnm env to ~/.zshrc"
+  else
+    echo "fnm env already in ~/.zshrc — skipping"
+  fi
+else
+  echo "fnm not found — skipping Node.js PATH config"
+fi
+
 # --- Set plugins: git z zsh-autosuggestions node ---
 DESIRED_PLUGINS="plugins=(git z zsh-autosuggestions node)"
 if grep -q '^plugins=(' "$ZSHRC"; then
