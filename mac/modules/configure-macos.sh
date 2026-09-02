@@ -24,7 +24,14 @@ case "$MODEL_NAME" in
   *)                MODEL_SUFFIX="Mac";;
 esac
 
-COMPUTER_NAME="Hector's ${MODEL_SUFFIX}"
+read -r -p "Enter the computer owner's name [Hack]: " OWNER_NAME
+OWNER_NAME="${OWNER_NAME:-Hack}"
+case "$OWNER_NAME" in
+  *[sS]) POSSESSIVE_NAME="${OWNER_NAME}'";;
+  *)     POSSESSIVE_NAME="${OWNER_NAME}'s";;
+esac
+
+COMPUTER_NAME="${POSSESSIVE_NAME} ${MODEL_SUFFIX}"
 # LocalHostName must be DNS-safe: no spaces, no apostrophes
 LOCAL_NAME="${MODEL_SUFFIX// /-}"
 
