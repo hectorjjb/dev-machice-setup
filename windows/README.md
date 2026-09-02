@@ -32,15 +32,16 @@ The script is idempotent — already-installed apps are skipped and re-running i
 ## What Gets Installed
 
 ### Apps (WinGet / Microsoft Store)
+
 - Git, Git LFS, GitHub CLI (`gh`)
 - .NET SDK 10 (includes `dotnet` CLI), Node.js LTS, Python 3.14
 - Visual Studio 2026 Enterprise, Visual Studio Code
 - Azure CLI, PowerShell 7, Windows Terminal, PowerToys
-- Docker Desktop
 - Ubuntu 24.04 (WSL), 7-Zip
 - Spotify, WhatsApp, Netflix, Plex
 
 ### Shell
+
 - **Oh My Posh** prompt (winget source) with the `mt.omp.json` theme
 - **CaskaydiaCove Nerd Font**
 - **Terminal-Icons** and **posh-git** PowerShell modules

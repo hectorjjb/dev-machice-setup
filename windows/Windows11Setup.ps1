@@ -50,7 +50,6 @@ $apps = @(
     @{name = "Microsoft.DotNet.SDK.10" },
     @{name = "Python.Python.3.14" },
     @{name = "Canonical.Ubuntu.2404" },
-    @{name = "Docker.DockerDesktop" },
     @{name = "Microsoft.VisualStudio.Enterprise" },    # Visual Studio 2026 Enterprise
     # @{name = "Microsoft.Azure.StorageExplorer" },
     # @{name = "Postman.Postman" },
@@ -128,14 +127,25 @@ if (-not $env:POSH_THEMES_PATH) {
 
 # Install WSL
 # https://learn.microsoft.com/en-us/windows/wsl/install
-Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -OutVariable WSLStatus | Out-Null
 $wslFreshlyInstalled = $false
-if ($WSLStatus.State -ne "Enabled") {
-    wsl --install
-    $wslFreshlyInstalled = $true
+if (Get-Command wsl.exe -ErrorAction SilentlyContinue) {
+    wsl --status 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "WSL already installed. Skipping..."
+    }
+    else {
+        # Ubuntu is installed separately by winget, so only enable WSL itself.
+        wsl --install --no-distribution
+        if ($LASTEXITCODE -eq 0) {
+            $wslFreshlyInstalled = $true
+        }
+        else {
+            Write-Output "Error installing WSL (exit code $LASTEXITCODE)."
+        }
+    }
 }
 else {
-    Write-Host "WSL already installed. Skipping..."
+    Write-Output "wsl.exe is unavailable; restart Windows and run this script again."
 }
 
 # Enable long paths
@@ -202,9 +212,16 @@ else {
     }
 }
 
+# Use the public registry for public global tools. A machine-configured package
+# feed proxy can return remote tarball URLs that npm rejects with EALLOWREMOTE.
+$npmRegistry = "https://registry.npmjs.org/"
+
 # Update npm
 try {
-    npm install --global npm
+    npm install --global npm --registry=$npmRegistry
+    if ($LASTEXITCODE -ne 0) {
+        throw "npm exited with code $LASTEXITCODE"
+    }
 }
 catch {
     Write-Output "Error updating npm: $_"
@@ -214,7 +231,10 @@ catch {
 # --allow-scripts permits yarn's preinstall script (no-op on Windows) and
 # silences npm 11+ allow-scripts warnings.
 try {
-    npm install --global yarn --allow-scripts=yarn
+    npm install --global yarn --allow-scripts=yarn --registry=$npmRegistry
+    if ($LASTEXITCODE -ne 0) {
+        throw "npm exited with code $LASTEXITCODE"
+    }
 }
 catch {
     Write-Output "Error installing yarn: $_"
@@ -224,7 +244,10 @@ catch {
 # --allow-scripts permits nx's postinstall script (soft-fails by design)
 # and silences npm 11+ allow-scripts warnings.
 try {
-    npm install --global nx --allow-scripts=nx
+    npm install --global nx --allow-scripts=nx --registry=$npmRegistry
+    if ($LASTEXITCODE -ne 0) {
+        throw "npm exited with code $LASTEXITCODE"
+    }
 }
 catch {
     Write-Output "Error installing nx: $_"
